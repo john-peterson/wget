@@ -98,8 +98,46 @@ url_enqueue (struct url_queue *queue, struct iri *i,
              const char *url, const char *referer, int depth,
              bool html_allowed, bool css_allowed)
 {
+  bool is_html = false;
+
+  if (opt.queue_type == queue_type_browser)
+    {
+      uerr_t status = RETROK;
+      char *mynewloc = NULL;
+      char *local_file = NULL;
+      int dt = 0, url_err;
+      struct url *proxy_url = NULL;
+      struct url *url_parsed = url_parse (url, &url_err, i, true);
+      const char *saved_method = opt.method;
+
+      setoptval ("method", "HEAD", "method");
+      status = http_loop (url_parsed, url_parsed, &mynewloc, &local_file, referer, &dt, proxy_url, i);
+      if (saved_method)
+        {
+          setoptval ("method", saved_method, "method");
+        }
+      else
+        {
+          DEBUGP (("Setting --method (method) to (null)\n"));
+          opt.method = NULL;
+        }
+
+      if (html_allowed && status == RETROK
+          && (dt & RETROKF) && (dt & TEXTHTML))
+        {
+          is_html = true;
+        }
+
+      if (status != RETROK)
+        {
+          DEBUGP (("Skipping nonexisting file %s at depth %d.\n",
+            quotearg_n_style (0, escape_quoting_style, url), depth));
+          return;
+        }
+    }
+
   bool append = opt.queue_type == queue_type_fifo
-    || (opt.queue_type == queue_type_browser && html_allowed);
+    || (opt.queue_type == queue_type_browser && is_html);
 
   struct queue_element *qel = xnew (struct queue_element);
   qel->iri = i;

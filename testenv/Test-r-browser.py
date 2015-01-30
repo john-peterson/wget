@@ -4,9 +4,9 @@ from test.http_test import HTTPTest
 from misc.wget_file import WgetFile
 
 """
-    This test executed Wget in Spider Browser mode.
+    This test executed Wget in Browser mode.
 """
-TEST_NAME = "Recursive Spider Browser"
+TEST_NAME = "Recursive Browser"
 ############# File Definitions ###############################################
 mainpage = """
 <html>
@@ -15,10 +15,10 @@ mainpage = """
 </head>
 <body>
   <p>
-    Some text and a link to a <a href="http://127.0.0.1:{{port}}/secondpage.html">second page</a>.
-    Also, an inline image <img src="http://127.0.0.1:{{port}}/image.svg">
-    Also, a linked image <a href="http://127.0.0.1:{{port}}/linkedimage.svg">
-    Also, a <a href="http://127.0.0.1:{{port}}/nonexistent">broken link</a>.
+    Some text and a link to a <a href="secondpage.html">second page</a>.
+    Also, an inline image <img src="image.svg">
+    Also, a linked image <a href="linkedimage.svg">
+    Also, a <a href="nonexistent">broken link</a>.
   </p>
 </body>
 </html>
@@ -32,8 +32,8 @@ secondpage = """
 </head>
 <body>
   <p>
-    Some text and a link to a <a href="http://127.0.0.1:{{port}}/thirdpage.html">third page</a>.
-    Also, a <a href="http://127.0.0.1:{{port}}/nonexistent">broken link</a>.
+    Some text and a link to a <a href="thirdpage.html">third page</a>.
+    Also, a <a href="nonexistent">broken link</a>.
   </p>
 </body>
 </html>
@@ -46,8 +46,8 @@ thirdpage = """
 </head>
 <body>
   <p>
-    Some text and a link to a <a href="http://127.0.0.1:{{port}}/dummy.txt">text file</a>.
-    Also, another <a href="http://127.0.0.1:{{port}}/againnonexistent">broken link</a>.
+    Some text and a link to a <a href="dummy.txt">text file</a>.
+    Also, another <a href="againnonexistent">broken link</a>.
   </p>
 </body>
 </html>
@@ -66,33 +66,30 @@ dummy_txt = WgetFile ("dummy.txt", dummyfile)
 Request_List = [
     [
         "HEAD /",
-        "HEAD /",
         "GET /",
         "GET /robots.txt",
         "HEAD /secondpage.html",
         "HEAD /image.svg",
         "HEAD /linkedimage.svg",
         "HEAD /nonexistent",
-        "HEAD /linkedimage.svg",
-        "HEAD /image.svg",
-        "HEAD /secondpage.html",
+        "GET /linkedimage.svg",
+        "GET /image.svg",
         "GET /secondpage.html",
-        "HEAD /thirdpage.html",
         "HEAD /thirdpage.html",
         "GET /thirdpage.html",
         "HEAD /dummy.txt",
         "HEAD /againnonexistent",
-        "HEAD /dummy.txt",
+        "GET /dummy.txt",
     ]
 ]
 
-WGET_OPTIONS = "--spider -r --queue-type=browser"
+WGET_OPTIONS = "-r -nd --queue-type=browser"
 WGET_URLS = [[""]]
 
 Files = [[index_html, image_svg, linkedimage_svg, secondpage_html, thirdpage_html, dummy_txt]]
 
 ExpectedReturnCode = 0
-ExpectedDownloadedFiles = []
+ExpectedDownloadedFiles = Files[0]
 
 ################ Pre and Post Test Hooks #####################################
 pre_test = {

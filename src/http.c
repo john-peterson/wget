@@ -3147,6 +3147,12 @@ http_loop (struct url *u, struct url *original_url, char **newloc,
     send_head_first = true;
   xfree (file_name);
 
+  /* Send preliminary HEAD request if user want only header. */
+  if (opt.method && c_strcasecmp (opt.method, "head") == 0)
+  {
+    send_head_first = true;
+  }
+
   /* THE loop */
   do
     {
@@ -3474,6 +3480,14 @@ Remote file exists.\n\n"));
                                  hstat.message ? quotearg_style (escape_quoting_style, hstat.message) : "");
                       goto exit;
                     }
+                }
+
+              if (opt.method && c_strcasecmp (opt.method, "head") == 0)
+                {
+                  logprintf (LOG_VERBOSE, _("\
+Remote file exists but user want only header -- not retrieving.\n\n"));
+                  ret = RETROK;
+                  goto exit;
                 }
 
               got_name = true;

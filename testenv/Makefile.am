@@ -51,6 +51,7 @@ if HAVE_PYTHON3
     Test-O.py                               \
     Test-Post.py                            \
     Test-504.py                             \
+    Test-r-browser.py                       \
     Test--spider-r.py                       \
     Test--spider-r-browser.py               \
     Test-redirect-crash.py
